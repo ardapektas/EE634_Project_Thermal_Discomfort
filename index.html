@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thermal Comfort from a Face · Reproduction</title>
+<meta name="description" content="A faithful reproduction of Bai et al. (2024): predicting personal thermal preference from infrared facial skin temperature using machine learning." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0c12;
+    --panel:#11151d;
+    --panel-2:#161b25;
+    --line:#222a36;
+    --ink:#ECE8E1;
+    --muted:#8a93a3;
+    --faint:#5c6473;
+
+    /* thermal ramp – the subject's native palette */
+    --cold:#3a4bb0;
+    --cool:#6d3ca8;
+    --mid:#c42e6a;
+    --warm:#f26b21;
+    --hot:#ffc857;
+
+    /* class / group accents */
+    --cooler:#4ca8e8;
+    --neutral:#9a7bd0;
+    --warmer:#f26b21;
+
+    --ensemble:#f26b21;   /* ensemble models */
+    --traditional:#4ca8e8;/* traditional models */
+    --broad:#c42e6a;      /* broad learning */
+
+    --display:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--body);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 600px at 78% -8%, rgba(242,107,33,.10), transparent 60%),
+      radial-gradient(800px 600px at -5% 25%, rgba(58,75,176,.12), transparent 55%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+
+  /* ---------- eyebrow / labels ---------- */
+  .eyebrow{
+    font-family:var(--mono);font-size:.72rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--warm);margin:0 0 14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--warm);display:inline-block;}
+
+  /* ---------- hero ---------- */
+  header.hero{padding:84px 0 40px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;}
+  h1{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(2.3rem,5.2vw,3.7rem);line-height:1.02;
+    letter-spacing:-.02em;margin:0 0 22px;
+  }
+  h1 .thermal{
+    background:linear-gradient(100deg,var(--cold),var(--cool) 30%,var(--mid) 55%,var(--warm) 78%,var(--hot));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{font-size:1.07rem;color:#cfd3da;max-width:46ch;margin:0 0 26px;}
+  .paperref{
+    font-family:var(--mono);font-size:.78rem;color:var(--muted);
+    border-left:2px solid var(--line);padding:4px 0 4px 14px;margin:0 0 30px;
+  }
+  .paperref a{color:var(--cooler);text-decoration:none;border-bottom:1px solid transparent;}
+  .paperref a:hover{border-bottom-color:var(--cooler);}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{
+    font-family:var(--mono);font-size:.82rem;letter-spacing:.02em;
+    text-decoration:none;padding:11px 18px;border-radius:8px;
+    border:1px solid var(--line);color:var(--ink);background:var(--panel);
+    transition:border-color .18s,transform .18s,background .18s;
+  }
+  .btn:hover{transform:translateY(-2px);border-color:var(--warm);}
+  .btn.primary{background:linear-gradient(100deg,var(--warm),var(--mid));border-color:transparent;color:#fff;font-weight:500;}
+  .btn.primary:hover{filter:brightness(1.07);}
+
+  /* ---------- thermal face (signature) ---------- */
+  .face-card{
+    position:relative;background:var(--panel);border:1px solid var(--line);
+    border-radius:18px;padding:22px 22px 18px;overflow:hidden;
+  }
+  .face-card .grain{
+    position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:radial-gradient(420px 360px at 60% 30%,rgba(242,107,33,.08),transparent 70%);
+  }
+  .face-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .face-head h3{font-family:var(--mono);font-weight:500;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0;}
+  .face-head .unit{font-family:var(--mono);font-size:.72rem;color:var(--faint);}
+  svg.face{width:100%;height:auto;display:block;}
+  .legend-keep{display:flex;gap:18px;justify-content:center;margin-top:6px;font-family:var(--mono);font-size:.68rem;color:var(--muted);}
+  .legend-keep span{display:inline-flex;align-items:center;gap:7px;}
+  .dot-keep{width:9px;height:9px;border-radius:50%;background:var(--warm);box-shadow:0 0 8px var(--warm);}
+  .dot-drop{width:9px;height:9px;border-radius:50%;border:1.5px dashed var(--faint);}
+
+  @keyframes pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+  .roi-glow{animation:pulse 3.4s ease-in-out infinite;}
+
+  /* ---------- generic sections ---------- */
+  section{padding:54px 0;border-top:1px solid var(--line);}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.01em;margin:0 0 10px;}
+  .section-intro{color:var(--muted);max-width:62ch;margin:0 0 34px;}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;}
+  .step{
+    flex:1 1 0;min-width:128px;background:var(--panel);border:1px solid var(--line);
+    border-radius:11px;padding:14px 14px 13px;position:relative;
+  }
+  .step .n{font-family:var(--mono);font-size:.66rem;color:var(--warm);letter-spacing:.12em;}
+  .step .t{font-family:var(--display);font-weight:600;font-size:.94rem;margin:5px 0 3px;}
+  .step .d{font-size:.78rem;color:var(--muted);line-height:1.45;}
+  .pipe .mod{flex-basis:100%;font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);margin:14px 0 2px;}
+  .pipe .mod:first-child{margin-top:0;}
+
+  /* ---------- stat band ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:8px;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:20px 18px;}
+  .stat .v{font-family:var(--mono);font-weight:700;font-size:1.85rem;letter-spacing:-.02em;line-height:1;}
+  .stat .v small{font-size:.95rem;color:var(--muted);font-weight:500;}
+  .stat .k{font-size:.8rem;color:var(--muted);margin-top:9px;line-height:1.4;}
+  .stat.accent .v{color:var(--warm);}
+
+  /* ---------- leaderboard ---------- */
+  .board{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .board-row{
+    display:grid;grid-template-columns:30px 78px 1fr 64px 64px;
+    align-items:center;gap:14px;padding:11px 18px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:.82rem;
+  }
+  .board-row.head{border-top:none;color:var(--faint);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:var(--panel-2);}
+  .board-row .rank{color:var(--faint);}
+  .board-row .name{font-weight:700;display:flex;align-items:center;gap:8px;}
+  .tag{font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:5px;font-weight:500;}
+  .tag.ensemble{color:var(--ensemble);background:rgba(242,107,33,.12);}
+  .tag.traditional{color:var(--traditional);background:rgba(76,168,232,.12);}
+  .tag.broad{color:var(--broad);background:rgba(196,46,106,.14);}
+  .bar-cell{display:flex;align-items:center;gap:11px;}
+  .bar-track{flex:1;height:7px;border-radius:4px;background:#1c2230;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;}
+  .bar-fill.ensemble{background:linear-gradient(90deg,var(--mid),var(--warm));}
+  .bar-fill.traditional{background:linear-gradient(90deg,#2b5fb0,var(--cooler));}
+  .bar-fill.broad{background:linear-gradient(90deg,#7a2db0,var(--mid));}
+  .bar-cell .num{color:var(--ink);font-weight:500;width:46px;text-align:right;}
+  .board-row .col{color:var(--muted);text-align:right;}
+  .board-note{font-size:.78rem;color:var(--faint);margin-top:14px;font-family:var(--mono);}
+
+  /* ---------- distance ---------- */
+  .dist{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .dcard{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:20px 20px 16px;}
+  .dcard h4{font-family:var(--display);font-weight:600;font-size:1.02rem;margin:0 0 2px;}
+  .dcard .rng{font-family:var(--mono);font-size:.72rem;color:var(--faint);margin-bottom:14px;}
+  .dcard .winner{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-bottom:14px;}
+  .dcard .winner b{color:var(--warm);}
+  .drow{display:flex;align-items:center;gap:10px;margin:7px 0;font-family:var(--mono);font-size:.74rem;}
+  .drow .m{width:42px;color:var(--muted);}
+  .drow .dt{flex:1;height:6px;border-radius:3px;background:#1c2230;overflow:hidden;}
+  .drow .df{height:100%;background:linear-gradient(90deg,var(--cool),var(--warm));border-radius:3px;}
+  .drow .ds{width:44px;text-align:right;color:var(--ink);}
+  .drow.best .m{color:var(--hot);font-weight:700;}
+
+  /* ---------- callout ---------- */
+  .callout{
+    background:linear-gradient(180deg,rgba(196,46,106,.08),rgba(58,75,176,.05));
+    border:1px solid var(--line);border-left:3px solid var(--mid);
+    border-radius:12px;padding:22px 24px;
+  }
+  .callout h3{font-family:var(--display);font-size:1.05rem;margin:0 0 10px;}
+  .callout p{margin:0 0 10px;color:#cfd3da;font-size:.92rem;}
+  .callout p:last-child{margin-bottom:0;}
+  .callout b{color:var(--ink);}
+
+  /* ---------- footer ---------- */
+  footer{padding:46px 0 70px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;}
+  footer .cite{font-family:var(--mono);font-size:.76rem;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:16px 18px;line-height:1.7;margin:14px 0 22px;color:#cfd3da;}
+  footer .links{display:flex;gap:22px;flex-wrap:wrap;}
+  footer .links a{color:var(--cooler);text-decoration:none;}
+  footer .links a:hover{text-decoration:underline;}
+  .disclaim{font-size:.76rem;color:var(--faint);margin-top:18px;max-width:64ch;}
+
+  a:focus-visible,.btn:focus-visible{outline:2px solid var(--hot);outline-offset:3px;border-radius:6px;}
+
+  @media (max-width:820px){
+    .hero-grid{grid-template-columns:1fr;gap:34px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .dist{grid-template-columns:1fr;}
+    .board-row{grid-template-columns:24px 64px 1fr 52px;}
+    .board-row .col.cv{display:none;}
+    header.hero{padding:60px 0 28px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">Reproduction · Building &amp; Environment 247 (2024)</p>
+        <h1>Reading thermal comfort<br>off a <span class="thermal">human face</span>.</h1>
+        <p class="lede">
+          A from-scratch reproduction of Bai et al.'s non-intrusive thermal-comfort model.
+          No wearables, no contact sensors — just the skin temperature of six facial regions,
+          read from infrared images, mapped to whether a person wants it
+          <em>cooler</em>, <em>neutral</em>, or <em>warmer</em>.
+        </p>
+        <p class="paperref">
+          Implements: Bai, Liu, Liu, Yu, Shen &amp; Sun (2024),
+          “Non-intrusive personal thermal comfort modeling: A machine learning approach
+          using infrared face recognition.”
+          <a href="https://doi.org/10.1016/j.buildenv.2023.111033">doi:10.1016/j.buildenv.2023.111033</a>
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="#findings">See the findings ↓</a>
+          <a class="btn" href="https://github.com/TeCSAR-UNCC/UNCC-ThermalFace">Charlotte-ThermalFace ↗</a>
+        </div>
+      </div>
+
+      <!-- SIGNATURE: thermal face with kept/dropped ROIs -->
+      <div class="face-card">
+        <span class="grain"></span>
+        <div class="face-head">
+          <h3>Mean ROI skin temperature</h3>
+          <span class="unit">°C · n=8,195</span>
+        </div>
+        <svg class="face" viewBox="0 0 360 430" xmlns="http://www.w3.org/2000/svg" role="img"
+             aria-label="Schematic face showing six measured regions. Cheeks, eyes, nose and mouth were kept as model features; forehead and chin were dropped.">
+          <defs>
+            <radialGradient id="gNose" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#6f7fd6"/><stop offset="100%" stop-color="#3a4bb0"/>
+            </radialGradient>
+            <radialGradient id="gCheek" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c75fa6"/><stop offset="100%" stop-color="#9b327f"/>
+            </radialGradient>
+            <radialGradient id="gEye" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ef7d52"/><stop offset="100%" stop-color="#d9532f"/>
+            </radialGradient>
+            <radialGradient id="gMouth" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f68a3c"/><stop offset="100%" stop-color="#ef6a1e"/>
+            </radialGradient>
+          </defs>
+
+          <!-- head silhouette -->
+          <path d="M180 24 C120 24 92 70 92 130 C92 168 96 196 104 224
+                   C113 256 130 300 152 332 C162 347 170 356 180 356
+                   C190 356 198 347 208 332 C230 300 247 256 256 224
+                   C264 196 268 168 268 130 C268 70 240 24 180 24 Z"
+                fill="#141925" stroke="#283042" stroke-width="1.5"/>
+
+          <!-- KEPT regions: filled, glowing -->
+          <!-- eyes -->
+          <circle class="roi-glow" cx="146" cy="158" r="15" fill="url(#gEye)" opacity=".9"/>
+          <circle class="roi-glow" cx="214" cy="158" r="15" fill="url(#gEye)" opacity=".9"/>
+          <!-- cheeks -->
+          <circle class="roi-glow" cx="130" cy="222" r="17" fill="url(#gCheek)" opacity=".9"/>
+          <circle class="roi-glow" cx="230" cy="222" r="17" fill="url(#gCheek)" opacity=".9"/>
+          <!-- nose (coldest) -->
+          <circle class="roi-glow" cx="180" cy="206" r="15" fill="url(#gNose)" opacity=".95"/>
+          <!-- mouth -->
+          <ellipse class="roi-glow" cx="180" cy="280" rx="26" ry="13" fill="url(#gMouth)" opacity=".9"/>
+
+          <!-- DROPPED regions: hollow dashed -->
+          <ellipse cx="180" cy="92" rx="40" ry="20" fill="none" stroke="#4a5366" stroke-width="1.6" stroke-dasharray="4 4"/>
+          <ellipse cx="180" cy="330" rx="26" ry="14" fill="none" stroke="#4a5366" stroke-width="1.6" stroke-dasharray="4 4"/>
+
+          <!-- labels -->
+          <g font-family="JetBrains Mono, monospace" font-size="12">
+            <text x="180" y="96" fill="#7d8696" text-anchor="middle">forehead 34.53</text>
+            <text x="180" y="334" fill="#7d8696" text-anchor="middle">chin 34.49</text>
+            <text x="84" y="158" fill="#ECE8E1" text-anchor="end">eyes</text>
+            <text x="84" y="172" fill="#8a93a3" text-anchor="end" font-size="11">34.21</text>
+            <text x="276" y="226" fill="#ECE8E1" text-anchor="start">cheeks</text>
+            <text x="276" y="240" fill="#8a93a3" text-anchor="start" font-size="11">33.70</text>
+            <text x="180" y="190" fill="#cdd1da" text-anchor="middle" font-size="11">nose 32.87</text>
+            <text x="180" y="306" fill="#cdd1da" text-anchor="middle" font-size="11">mouth 34.38</text>
+          </g>
+        </svg>
+        <div class="legend-keep">
+          <span><span class="dot-keep"></span> kept as feature</span>
+          <span><span class="dot-drop"></span> dropped from model</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- WHAT IT DOES -->
+<section id="about">
+  <div class="wrap">
+    <p class="eyebrow">The idea</p>
+    <h2>Comfort you can measure without touching anyone</h2>
+    <p class="section-intro">
+      HVAC systems run on one set-point for a whole room, yet people in that room disagree about
+      whether they're too hot or too cold. This project rebuilds a data-driven alternative: an
+      infrared camera reads facial skin temperature from a distance, and a classifier infers each
+      person's thermal preference. Everything here runs on the public Charlotte-ThermalFace dataset,
+      so the whole pipeline is reproducible end to end.
+    </p>
+
+    <div class="pipe">
+      <div class="mod">Module 1 — skin temperature extraction</div>
+      <div class="step"><div class="n">DATA</div><div class="t">Thermal images</div><div class="d">10 subjects, 10 camera distances, 16-bit radiometric TIFFs.</div></div>
+      <div class="step"><div class="n">LANDMARKS</div><div class="t">73 key points</div><div class="d">Facial landmarks → polygon per region (43 points for side faces).</div></div>
+      <div class="step"><div class="n">ROI</div><div class="t">6 regions → °C</div><div class="d">Mean temperature per region via TLinear (raw/100 − 273.15 K).</div></div>
+      <div class="mod">Module 2 — thermal comfort modeling</div>
+      <div class="step"><div class="n">SELECT</div><div class="t">RF + GBDT importance</div><div class="d">Model uses cheeks, eyes, nose, mouth (forehead &amp; chin dropped, per paper).</div></div>
+      <div class="step"><div class="n">TRAIN</div><div class="t">11 classifiers</div><div class="d">6 traditional + 4 ensemble + Broad Learning, 80/20 split.</div></div>
+      <div class="step"><div class="n">EVALUATE</div><div class="t">By model &amp; by distance</div><div class="d">Precision, recall, F1, macro-F1 with 5-fold CV.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINDINGS -->
+<section id="findings">
+  <div class="wrap">
+    <p class="eyebrow">What the reproduction found</p>
+    <h2>Findings</h2>
+    <p class="section-intro">
+      All numbers below are from this implementation, evaluated honestly on held-out data with
+      5-fold cross-validation. Where they diverge from the original paper, the page says so plainly.
+    </p>
+
+    <div class="stats">
+      <div class="stat"><div class="v">8,152</div><div class="k">samples used for modeling (8,195 extracted → 8,154 labelled)</div></div>
+      <div class="stat"><div class="v">4 <small>of 6</small></div><div class="k">facial regions retained: cheeks, eyes, nose, mouth</div></div>
+      <div class="stat accent"><div class="v">0.736</div><div class="k">best CV macro-F1 — XGBoost, the top ensemble model</div></div>
+      <div class="stat"><div class="v">↓ <small>with range</small></div><div class="k">accuracy falls monotonically as the camera moves back</div></div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;margin:38px 0 14px;font-size:1.15rem;">Model leaderboard</h3>
+    <div class="board">
+      <div class="board-row head">
+        <span>#</span><span>Model</span><span>CV macro-F1</span><span class="col">Prec.</span><span class="col cv">Recall</span>
+      </div>
+      <!-- bars scaled across [0.55, 0.75] -->
+      <div class="board-row"><span class="rank">1</span><span class="name">XGB <span class="tag ensemble">ens</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill ensemble" style="width:93%"></span></span><span class="num">0.736</span></span>
+        <span class="col">0.739</span><span class="col cv">0.741</span></div>
+      <div class="board-row"><span class="rank">2</span><span class="name">KNN <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:92%"></span></span><span class="num">0.735</span></span>
+        <span class="col">0.736</span><span class="col cv">0.744</span></div>
+      <div class="board-row"><span class="rank">3</span><span class="name">RF <span class="tag ensemble">ens</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill ensemble" style="width:91%"></span></span><span class="num">0.733</span></span>
+        <span class="col">0.731</span><span class="col cv">0.738</span></div>
+      <div class="board-row"><span class="rank">4</span><span class="name">GBDT <span class="tag ensemble">ens</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill ensemble" style="width:90%"></span></span><span class="num">0.730</span></span>
+        <span class="col">0.733</span><span class="col cv">0.735</span></div>
+      <div class="board-row"><span class="rank">5</span><span class="name">DNN <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:90%"></span></span><span class="num">0.730</span></span>
+        <span class="col">0.730</span><span class="col cv">0.735</span></div>
+      <div class="board-row"><span class="rank">6</span><span class="name">GBM <span class="tag ensemble">ens</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill ensemble" style="width:82%"></span></span><span class="num">0.715</span></span>
+        <span class="col">0.729</span><span class="col cv">0.735</span></div>
+      <div class="board-row"><span class="rank">7</span><span class="name">BL <span class="tag broad">broad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill broad" style="width:77%"></span></span><span class="num">0.704</span></span>
+        <span class="col">0.703</span><span class="col cv">0.712</span></div>
+      <div class="board-row"><span class="rank">8</span><span class="name">DT <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:72%"></span></span><span class="num">0.695</span></span>
+        <span class="col">0.705</span><span class="col cv">0.706</span></div>
+      <div class="board-row"><span class="rank">9</span><span class="name">SVM <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:70%"></span></span><span class="num">0.690</span></span>
+        <span class="col">0.687</span><span class="col cv">0.705</span></div>
+      <div class="board-row"><span class="rank">10</span><span class="name">LR <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:33%"></span></span><span class="num">0.615</span></span>
+        <span class="col">0.622</span><span class="col cv">0.628</span></div>
+      <div class="board-row"><span class="rank">11</span><span class="name">NB <span class="tag traditional">trad</span></span>
+        <span class="bar-cell"><span class="bar-track"><span class="bar-fill traditional" style="width:19%"></span></span><span class="num">0.588</span></span>
+        <span class="col">0.597</span><span class="col cv">0.638</span></div>
+    </div>
+    <p class="board-note">
+      Ranked by 5-fold CV macro-F1 on the held-out folds. DCF (Deep Cascade Forest) is absent —
+      <span style="color:var(--muted)">deep-forest</span> was not installed in this run, so the paper's
+      joint-best model could not be scored here.
+    </p>
+
+    <h3 style="font-family:var(--display);font-weight:600;margin:40px 0 14px;font-size:1.15rem;">Performance vs. camera distance</h3>
+    <div class="dist">
+      <div class="dcard">
+        <h4>Short</h4><div class="rng">1.0 – 1.8 m</div>
+        <div class="winner">best: <b>XGB</b></div>
+        <div class="drow best"><span class="m">XGB</span><span class="dt"><span class="df" style="width:96%"></span></span><span class="ds">0.789</span></div>
+        <div class="drow"><span class="m">RF</span><span class="dt"><span class="df" style="width:95%"></span></span><span class="ds">0.788</span></div>
+        <div class="drow"><span class="m">GBDT</span><span class="dt"><span class="df" style="width:92%"></span></span><span class="ds">0.783</span></div>
+        <div class="drow"><span class="m">GBM</span><span class="dt"><span class="df" style="width:83%"></span></span><span class="ds">0.766</span></div>
+        <div class="drow"><span class="m">BL</span><span class="dt"><span class="df" style="width:78%"></span></span><span class="ds">0.758</span></div>
+      </div>
+      <div class="dcard">
+        <h4>Medium</h4><div class="rng">2.2 – 4.0 m</div>
+        <div class="winner">best: <b>RF</b></div>
+        <div class="drow best"><span class="m">RF</span><span class="dt"><span class="df" style="width:88%"></span></span><span class="ds">0.757</span></div>
+        <div class="drow"><span class="m">GBDT</span><span class="dt"><span class="df" style="width:82%"></span></span><span class="ds">0.746</span></div>
+        <div class="drow"><span class="m">XGB</span><span class="dt"><span class="df" style="width:80%"></span></span><span class="ds">0.744</span></div>
+        <div class="drow"><span class="m">GBM</span><span class="dt"><span class="df" style="width:75%"></span></span><span class="ds">0.737</span></div>
+        <div class="drow"><span class="m">BL</span><span class="dt"><span class="df" style="width:67%"></span></span><span class="ds">0.720</span></div>
+      </div>
+      <div class="dcard">
+        <h4>Long</h4><div class="rng">4.6 – 6.6 m</div>
+        <div class="winner">best: <b>RF</b></div>
+        <div class="drow best"><span class="m">RF</span><span class="dt"><span class="df" style="width:80%"></span></span><span class="ds">0.739</span></div>
+        <div class="drow"><span class="m">XGB</span><span class="dt"><span class="df" style="width:75%"></span></span><span class="ds">0.731</span></div>
+        <div class="drow"><span class="m">GBDT</span><span class="dt"><span class="df" style="width:72%"></span></span><span class="ds">0.726</span></div>
+        <div class="drow"><span class="m">BL</span><span class="dt"><span class="df" style="width:69%"></span></span><span class="ds">0.718</span></div>
+        <div class="drow"><span class="m">GBM</span><span class="dt"><span class="df" style="width:64%"></span></span><span class="ds">0.710</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:34px" class="callout">
+      <h3>How this lines up with the original paper</h3>
+      <p>
+        <b>Confirmed.</b> The nose runs coldest (32.87 °C here), ensemble models clearly beat the
+        weakest linear baselines (Logistic Regression, Naive Bayes), the neutral class is the hardest
+        to call, and accuracy decays steadily as the subject sits farther from the camera.
+      </p>
+      <p>
+        <b>Diverged — feature importance.</b> The model still uses cheeks, eyes, nose and mouth, but
+        that set follows the paper by design; this run's own importances don't reproduce the paper's
+        ranking. <b>Cheek dominates</b> (RF 0.31, GBDT 0.62), while <b>mouth</b> — one of the kept
+        regions — actually scores lowest in both, and forehead and chin are not clearly the weakest.
+        The four-region choice rests on the paper's precedent more than on this data.
+      </p>
+      <p>
+        <b>Diverged — models.</b> The paper reports Broad Learning and DCF as joint-best, with BL
+        precision near 90%. In this reproduction every model sits in a tighter, lower band
+        (macro-F1 ≈ 0.59–0.74), <b>XGBoost leads</b>, and BL is mid-pack. The likeliest causes: a
+        stricter held-out CV protocol instead of training-set scores, a corrected TLinear scale and
+        reconstructed ROI polygons, and the absence of DCF in this environment. BL still trains fast
+        and stays competitive — its original selling point holds even if its top ranking doesn't.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <p class="eyebrow">Cite the original work</p>
+    <div class="cite">
+      Bai, Y., Liu, L., Liu, K., Yu, S., Shen, Y., &amp; Sun, D. (2024). Non-intrusive personal
+      thermal comfort modeling: A machine learning approach using infrared face recognition.
+      <em>Building and Environment, 247</em>, 111033.
+      https://doi.org/10.1016/j.buildenv.2023.111033
+    </div>
+    <div class="links">
+      <a href="https://doi.org/10.1016/j.buildenv.2023.111033">Paper (DOI) ↗</a>
+      <a href="https://github.com/TeCSAR-UNCC/UNCC-ThermalFace">Charlotte-ThermalFace dataset ↗</a>
+      <a href="#findings">Back to findings ↑</a>
+    </div>
+    <p class="disclaim">
+      Independent reproduction for research and educational purposes. Results were obtained on the
+      public Charlotte-ThermalFace dataset and reflect this implementation's choices; they are not the
+      authors' official figures. Code, data prep, and trained-model scripts live in the repository.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
