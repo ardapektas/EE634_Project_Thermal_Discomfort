@@ -113,7 +113,7 @@ The pipeline keeps cheeks, eyes, nose and mouth to match the paper, but the impo
 | forehead | 0.143 | 0.113 |
 | mouth | 0.091 | 0.054 |
 
-Cheek dominates both rankings, but mouth — a *retained* feature — is the weakest in both, and forehead/chin are not clearly the bottom two. So the four-region choice here rests on the paper's precedent rather than on this run's importances.
+Cheek dominates both rankings, but mouth a *retained* feature is the weakest in both, and forehead/chin are not clearly the bottom two. So the four-region choice here rests on the paper's precedent rather than on this run's importances.
 
 ### How this compares to the paper
 
