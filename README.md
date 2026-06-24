@@ -2,7 +2,7 @@
 
 A reproduction of **Bai et al. (2024), _"Non-intrusive personal thermal comfort modeling: A machine learning approach using infrared face recognition"_** (*Building and Environment* 247, 111033, [doi:10.1016/j.buildenv.2023.111033](https://doi.org/10.1016/j.buildenv.2023.111033)).
 
-The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral** or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.
+The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral** or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.   The cleaned dataset used in this project is available here: https://drive.google.com/file/d/1_4SKIRT782gqpWJgroDnhmNL51XEC6bB/view?usp=sharing
 
 ---
 
