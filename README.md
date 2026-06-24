@@ -52,11 +52,6 @@ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\act
 pip install -r requirements.txt
 ```
 
-Two dependencies are optional and only widen the model set:
-
-- `xgboost` enables the **XGB** model (the top performer here).
-- `deep-forest` enables **DCF** (Deep Cascade Forest). It was *not* installed in this run, so DCF is missing from the results — installing it lets you score the paper's joint-best model.
-
 ---
 
 ## Reproducing the results
