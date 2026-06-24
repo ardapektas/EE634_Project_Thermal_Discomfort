@@ -4,7 +4,5 @@ pandas>=1.5
 scikit-learn>=1.1
 tifffile>=2023.1.23      # read 16-bit radiometric TIFFs (extract_roi_temperatures.py)
 Pillow>=9.0              # polygon rasterization for ROI masks (PIL)
-
-# Optional — widen the model set; scripts skip gracefully if absent
 xgboost>=1.7             # enables the XGB model (top performer in this run)
-deep-forest>=0.1.5       # enables DCF (Deep Cascade Forest); not installed in the reported run
+
