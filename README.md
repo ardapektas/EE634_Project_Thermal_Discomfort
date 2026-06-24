@@ -10,9 +10,9 @@ The goal is contact-free: instead of wearables or skin-attached sensors, an infr
 
 The work is split into two modules, mirroring the paper.
 
-**Module 1 — skin temperature extraction.** For each thermal image, facial landmarks define polygons over six regions of interest (forehead, cheeks, eyes, nose, mouth, chin). Raw 16-bit radiometric pixels are converted to Celsius and averaged inside each polygon, producing one temperature row per image.
+**Module 1:** For each thermal image, facial landmarks define polygons over six regions of interest (forehead, cheeks, eyes, nose, mouth, chin). Raw 16-bit radiometric pixels are converted to Celsius and averaged inside each polygon, producing one temperature row per image.
 
-**Module 2 — thermal comfort modeling.** Following the paper, forehead and chin are dropped a priori, leaving **cheeks, eyes, nose, mouth**; Random Forest and GBDT importances are also computed for comparison (see [Results](#results)). The four features are z-scored and split 80/20, then eleven classifiers are trained and compared by precision, recall, F1 and macro-F1 with 5-fold cross-validation both overall and separately for short, medium and long camera distances.
+**Module 2:** Following the paper, forehead and chin are dropped a priori, leaving **cheeks, eyes, nose, mouth**; Random Forest and GBDT importances are also computed for comparison (see [Results](#results)). The four features are z-scored and split 80/20, then eleven classifiers are trained and compared by precision, recall, F1 and macro-F1 with 5-fold cross-validation both overall and separately for short, medium and long camera distances.
 
 ---
 
