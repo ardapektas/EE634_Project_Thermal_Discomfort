@@ -2,7 +2,7 @@
 
 A reproduction of **Bai et al. (2024), _"Non-intrusive personal thermal comfort modeling: A machine learning approach using infrared face recognition"_** (*Building and Environment* 247, 111033, [doi:10.1016/j.buildenv.2023.111033](https://doi.org/10.1016/j.buildenv.2023.111033)).
 
-The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral**, or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.
+The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral** or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.
 
 A live summary page lives in [`index.html`](index.html) (see *GitHub Pages* below).
 
@@ -14,7 +14,7 @@ The work is split into two modules, mirroring the paper.
 
 **Module 1 — skin temperature extraction.** For each thermal image, facial landmarks define polygons over six regions of interest (forehead, cheeks, eyes, nose, mouth, chin). Raw 16-bit radiometric pixels are converted to Celsius and averaged inside each polygon, producing one temperature row per image.
 
-**Module 2 — thermal comfort modeling.** Following the paper, forehead and chin are dropped a priori, leaving **cheeks, eyes, nose, mouth**; Random Forest and GBDT importances are also computed for comparison (see [Results](#results)). The four features are z-scored and split 80/20, then eleven classifiers are trained and compared by precision, recall, F1 and macro-F1 with 5-fold cross-validation — both overall and separately for short, medium and long camera distances.
+**Module 2 — thermal comfort modeling.** Following the paper, forehead and chin are dropped a priori, leaving **cheeks, eyes, nose, mouth**; Random Forest and GBDT importances are also computed for comparison (see [Results](#results)). The four features are z-scored and split 80/20, then eleven classifiers are trained and compared by precision, recall, F1 and macro-F1 with 5-fold cross-validation both overall and separately for short, medium and long camera distances.
 
 ---
 
@@ -123,7 +123,7 @@ Cheek dominates both rankings, but mouth — a *retained* feature — is the wea
 
 **Diverged — feature importance.** The model uses the paper's four regions, but this run's RF/GBDT importances don't reproduce the paper's ranking (cheek dominates; mouth, a kept feature, ranks lowest; forehead and chin aren't unambiguously weakest). See the table above.
 
-**Diverged — models.** The paper reports Broad Learning and DCF as joint-best, with BL precision near 90%. Here the models sit in a tighter, lower band (macro-F1 ≈ 0.59–0.74), **XGBoost leads**, and BL is mid-pack. The most likely reasons are a stricter held-out CV protocol (vs. training-set scores), a corrected TLinear scale with reconstructed ROI polygons, and the absence of DCF in this environment. BL still trains fast and stays competitive, so its core argument — a quick alternative to deep networks — survives even though its top ranking does not.
+**Diverged — models.** The paper reports Broad Learning and DCF as joint-best, with BL precision near 90%. Here the models sit in a tighter, lower band (macro-F1 ≈ 0.59–0.74), **XGBoost leads**, and BL is mid-pack. The most likely reasons are a stricter held-out CV protocol (vs. training-set scores), a corrected TLinear scale with reconstructed ROI polygons, and the absence of DCF in this environment. BL still trains fast and stays competitive, so its core argument, a quick alternative to deep networks, survives even though its top ranking does not.
 
 ---
 
