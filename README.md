@@ -119,9 +119,9 @@ Cheek dominates both rankings, but mouth a *retained* feature is the weakest in 
 
 **Confirmed.** The nose is the coldest region (32.87 °C here), ensemble models beat the linear baselines, the neutral class is the hardest to predict, and performance degrades with distance.
 
-**Diverged — feature importance.** The model uses the paper's four regions, but this run's RF/GBDT importances don't reproduce the paper's ranking (cheek dominates; mouth, a kept feature, ranks lowest; forehead and chin aren't unambiguously weakest). See the table above.
+**Diverged (feature importance).** The model uses the paper's four regions, but this run's RF/GBDT importances don't reproduce the paper's ranking (cheek dominates; mouth, a kept feature, ranks lowest; forehead and chin aren't unambiguously weakest). See the table above.
 
-**Diverged — models.** The paper reports Broad Learning and DCF as joint-best, with BL precision near 90%. Here the models sit in a tighter, lower band (macro-F1 ≈ 0.59–0.74), **XGBoost leads**, and BL is mid-pack. The most likely reasons are a stricter held-out CV protocol (vs. training-set scores), a corrected TLinear scale with reconstructed ROI polygons, and the absence of DCF in this environment. BL still trains fast and stays competitive, so its core argument, a quick alternative to deep networks, survives even though its top ranking does not.
+**Diverged (models).** The paper reports Broad Learning and DCF as joint-best, with BL precision near 90%. Here the models sit in a tighter, lower band (macro-F1 ≈ 0.59–0.74), **XGBoost leads**, and BL is mid-pack. The most likely reasons are a stricter held-out CV protocol (vs. training-set scores), a corrected TLinear scale with reconstructed ROI polygons, and the absence of DCF in this environment. BL still trains fast and stays competitive, so its core argument, a quick alternative to deep networks, survives even though its top ranking does not.
 
 ---
 
