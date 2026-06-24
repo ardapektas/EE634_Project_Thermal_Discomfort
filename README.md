@@ -4,8 +4,6 @@ A reproduction of **Bai et al. (2024), _"Non-intrusive personal thermal comfort 
 
 The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral** or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.
 
-A live summary page lives in [`index.html`](index.html) (see *GitHub Pages* below).
-
 ---
 
 ## What it does
