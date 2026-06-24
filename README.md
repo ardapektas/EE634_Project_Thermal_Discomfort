@@ -2,7 +2,7 @@
 
 A reproduction of **Bai et al. (2024), _"Non-intrusive personal thermal comfort modeling: A machine learning approach using infrared face recognition"_** (*Building and Environment* 247, 111033, [doi:10.1016/j.buildenv.2023.111033](https://doi.org/10.1016/j.buildenv.2023.111033)).
 
-The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral**, or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace), so the full pipeline — from raw radiometric images to the final model comparison — is reproducible.
+The goal is contact-free: instead of wearables or skin-attached sensors, an infrared camera reads facial skin temperature, and a classifier predicts whether a person would prefer the room **cooler**, **neutral**, or **warmer**. Everything runs on the public [Charlotte-ThermalFace dataset](https://github.com/TeCSAR-UNCC/UNCC-ThermalFace) so the full pipeline from raw radiometric images to the final model comparison is reproducible.
 
 A live summary page lives in [`index.html`](index.html) (see *GitHub Pages* below).
 
@@ -22,21 +22,21 @@ The work is split into two modules, mirroring the paper.
 
 ```
 .
-├── index.html                          # GitHub Pages demo: intro + findings
+├── index.html                        
 ├── README.md
 ├── requirements.txt
 │
-├── extract_roi_temperatures.py         # Module 1 · per-subject ROI extraction (one CSV + TIFFs)
-├── batch_extract_all.py                # Module 1 · batch over S1–S10 → combined CSV
-├── prepare_dataset.py                  # Module 2 · clean, feature-select, normalize, split
-├── train_models.py                     # Module 2 · train & compare the 11 models
-├── distance_analysis.py                # Module 2 · re-run strong models per distance band
+├── extract_roi_temperatures.py        
+├── batch_extract_all.py               
+├── prepare_dataset.py                  
+├── train_models.py                     
+├── distance_analysis.py                
 │
-├── all_subjects_roi_temperatures.csv   # Module 1 output (8,195 rows)
-├── dataset_clean.csv                   # modeling rows after cleaning (8,152)
-├── module2_data.npz                    # X_train / X_test / y_train / y_test / feature names
-├── model_results.csv                   # full model comparison table
-└── distance_results.csv                # macro-F1 by distance band
+├── all_subjects_roi_temperatures.csv   
+├── dataset_clean.csv                   
+├── module2_data.npz                    
+├── model_results.csv                   
+└── distance_results.csv                
 ```
 
 ---
