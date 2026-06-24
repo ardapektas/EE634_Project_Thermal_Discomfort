@@ -67,13 +67,9 @@ The dataset images are large and not included — download Charlotte-ThermalFace
 # Module 1 — extract six ROI temperatures for every image of every subject
 python batch_extract_all.py            # → all_subjects_roi_temperatures.csv
 
-# Module 2 — clean, select features, normalize, split
+# Module 2
 python prepare_dataset.py              # → dataset_clean.csv, module2_data.npz
-
-# Module 2 — train and compare all models
 python train_models.py                 # → model_results.csv
-
-# Module 2 — compare strong models across camera distances
 python distance_analysis.py            # → distance_results.csv
 ```
 
@@ -111,7 +107,7 @@ Best model by camera distance (CV macro-F1):
 
 Across every model, accuracy falls monotonically as the camera moves back — the headline distance effect from the paper holds.
 
-### Feature importance (this run)
+### Feature importance 
 
 The pipeline keeps cheeks, eyes, nose and mouth to match the paper, but the importances computed on this data tell a different story:
 
@@ -165,10 +161,6 @@ To keep the page at a custom path instead, move `index.html` into a `/docs` fold
 ```
 
 Dataset: Ashrafi, R., Azarbayjani, M., & Tabkhi, H. (2022). Charlotte-ThermalFace: A fully annotated thermal infrared face dataset. *Infrared Physics & Technology*, 124, 104209.
-
-## Acknowledgements
-
-Thanks to the original authors and to the UNC Charlotte TeCSAR lab for releasing the Charlotte-ThermalFace dataset publicly, which makes this reproduction possible.
 
 ## License
 
